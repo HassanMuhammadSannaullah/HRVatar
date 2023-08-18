@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR-VATAR</title>
+    <!-- Add Materialize CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <style>
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #1976D2;
+            /* Darker blue color for the navigation bar */
+            color: #fff;
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+        }
+
+        .navbar-logo {
+            flex: 1;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+
+        .navbar-links {
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        .login-button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            background-color: #2196F3;
+            /* Blue color for the login button */
+            color: #fff;
+            /* White text color for the login button */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .login-button:hover {
+            background-color: #1976D2;
+            /* Slightly darker blue color on hover */
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 100px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-field {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button[type="submit"] {
+            background-color: #2196F3;
+            /* Blue color for the submit button */
+            color: #fff;
+            /* White text color for the submit button */
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #1976D2;
+            /* Slightly darker blue color on hover */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="navbar">
+        <a href="/" class="navbar-logo">HR-VATAR</a>
+        <div class="navbar-links">
+            <a href="#contact-section">Contact Us</a>
+        </div>
+        <a href="/login" class="login-button">Login</a>
+    </div>
+
+    <div class="container">
+        <h2>Sign Up</h2>
+        <form action="/process_signup" method="post" onsubmit="return validateEmail()">
+            <input type="hidden" name="signup_type" value="company">
+            <div class="input-field">
+                <input type="text" name="company_name" id="company_name" required>
+                <label for="company_name">Company Name</label>
+            </div>
+            <div class="input-field">
+                <input type="text" name="hr_full_name" id="hr_full_name" required>
+                <label for="hr_full_name">HR Full Name</label>
+            </div>
+            <div class="input-field">
+                <input type="email" name="email" id="email" required>
+                <label for="email">Email</label>
+            </div>
+            <div class="input-field">
+                <input type="password" name="password" id="password" required>
+                <label for="password">Password</label>
+            </div>
+            <button type="submit">Sign Up</button>
+        </form>
+    </div>
+
+    <!-- Add the contact section -->
+    <div id="contact-section" class="container">
+        <h2>Contact Us</h2>
+        <p>
+            For any inquiries or support, please feel free to reach out to us via the following email addresses:
+        </p>
+        <ul>
+            <li>Email: <a href="mailto:support@hrvatar.com">support@hrvatar.com</a></li>
+            <li>Email: <a href="mailto:info@hrvatar.com">info@hrvatar.com</a></li>
+            <!-- Add more email addresses as needed -->
+        </ul>
+    </div>
+
+    <!-- Add Materialize JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <script>
+        function validateEmail() {
+            const emailInput = document.getElementById("email");
+            const email = emailInput.value.trim();
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailPattern.test(email)) {
+                alert("Please enter a valid email address.");
+                emailInput.focus();
+                return false;
+            }
+            return true;
+        }
+    </script>
+</body>
+
+</html>
