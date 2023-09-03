@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR-VATAR Dashboard</title>
+    <!-- Add Materialize CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <style>
+        /* The top bar styling */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #161414;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            z-index: 2;
+        }
+
+        .navbar-logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .navbar-logo:hover {
+            text-decoration: underline;
+        }
+
+        .navbar-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .center-section {
+            flex-grow: 1;
+            text-align: center;
+            margin: 0 20px; /* Add margin to center section */
+        }
+
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        .login-button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            background-color: #161414;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .login-button:hover {
+            background-color: #2196F3;
+        }
+
+
+        .sidebar-container{
+            margin-top: 160px;
+
+        }
+
+        /* The side menu styling */
+        .sidebar {
+            height: 100%;
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #161414;
+            color: #fff;
+            padding-top: 100px; /* Increased the top padding */
+            z-index: 1;
+            overflow-x: hidden;
+            transition: 0.3s;
+        }
+
+
+        .sidebar-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 2rem;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .sidebar a {
+            margin-bottom: 40px;
+            padding-left: 16px;
+            text-decoration: none;
+            font-size: 1.5rem;
+            color: #fff;
+            display: block;
+            transition: 0.3s;
+        }
+
+        .sidebar a:hover {
+            background-color: #2196F3; /* Change the background color on hover */
+            padding: 10px 16px;
+            border-radius: 5px;
+        }
+
+        /* The content section styling */
+        .content-section {
+            margin-top: 35px;
+            padding: 20px;
+            font-size: 1.2rem;
+            color: #333;
+            margin-left: 250px;
+            transition: 0.3s;
+        }
+
+        .content-section.sidebar-closed {
+            margin-left: 0;
+        }
+
+        /* Cursor pointer for the hamburger icon */
+        .open-menu {
+            cursor: pointer;
+            font-size: 2rem;
+            margin-right: 10px;
+        }
+
+        .job-section {
+            margin-top: 200px;
+            text-align: center;
+        }
+
+
+        #job_link {
+            border-radius: 10px;
+            padding: 10px;
+            border: 5px solid #ccc;
+            width: 800px;
+            margin: 10px 0; /* Add margin to separate the input from the text and button */
+        }
+
+
+
+    </style>
+</head>
+
+<body>
+    <!-- Side Menu -->
+    <div id="mySidebar" class="sidebar" style="width: 250px;">
+        <span class="sidebar-close" onclick="toggleSidebar()">&times;</span>
+        <div class="sidebar-container">
+            <a class="sidebar-link" href="#" onclick="showHomeContent()" id="Homelink">Home</a>
+            <a class="sidebar-link" href="#" onclick="showApplyJobContent()" id="Applylink">Apply with Job ID</a>
+            <a class="sidebar-link" href="#" onclick="showViewPostedJobsContent()" id="Appliedlink">View Applied Jobs</a>
+        </div>
+    </div>
+
+    <!-- Top Bar -->
+    <div class="navbar">
+        <span class="open-menu" onclick="toggleSidebar()">&#9776;</span>
+        <div class="navbar-logo" onclick="location.href='/';">HR-VATAR</div>
+        <div class="center-section">
+            <div class="navbar-title">Candidate Dashboard</div>
+        </div>
+        <div class="right-section">
+            <a href="/logout" class="login-button">LOG OUT</a>
+        </div>
+    </div>
+
+    <!-- Content Sections -->
+    <div class="content-section" id="homeContent">
+        <div style="display: flex; align-items: flex-end;">
+            <h2>Hello, {{ name }}</h2>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: center;">
+            <img src="{{ image_url }}" alt="Avatar" style="width: 500px; height: 500px; object-fit: cover; border-radius: 0;">
+        </div>
+        <div id="profileImageAlert" style="display: none; text-align: center; margin-top: 10px;">
+            <p>Upload a profile picture to continue.</p>
+            <button class="login-button" onclick="uploadProfileImage()">Upload Image</button>
+        </div>
+    </div>
+
+    <div class="content-section" id="ApplyJobContent">
+        <div class="job-section">
+            <h1 id="applyForJob">APPLY USING JOB ID</h1>
+            <input type="url" id="job_link" placeholder="Enter the Job ID from your email">
+            <br>
+            <button class="login-button" id="InterviewButton">Give Interview</button>
+        </div>
+    </div>
+
+    <div class="content-section" id="viewPostedJobsContent" style="display:none;">
+        <h2>Applied Jobs</h2>
+        <table class="jobs-table" id="jobsTable">
+            <!-- Table headers, remain static -->
+            <tr>
+                <th>Company</th>
+                <th>Job/Position</th>
+                <th>Description</th>
+                <th>Still Hiring</th>
+            </tr>
+            <!-- Table body, will be updated dynamically using JavaScript -->
+            <tbody id="jobsTableBody">
+            </tbody>
+        </table>
+    </div>
+    
+
+    <!-- Add Materialize JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        /* JavaScript functions to handle the side menu and content display */
+        function toggleSidebar() {
+            const sidebar = document.getElementById("mySidebar");
+            const contentSections = document.getElementsByClassName("content-section");
+            if (sidebar.style.width === "250px") {
+                sidebar.style.width = "0";
+                for (const section of contentSections) {
+                    section.classList.add("sidebar-closed");
+                }
+            } else {
+                sidebar.style.width = "250px";
+                for (const section of contentSections) {
+                    section.classList.remove("sidebar-closed");
+                }
+            }
+        }
+
+        function showHomeContent() {
+            hideAllContent();
+            document.getElementById("homeContent").style.display = "block";
+        }
+
+        function showApplyJobContent() {
+            hideAllContent();
+            document.getElementById("ApplyJobContent").style.display = "block";
+        }
+
+        function showViewPostedJobsContent() {
+            hideAllContent();
+            document.getElementById("viewPostedJobsContent").style.display = "block";
+        }
+
+        function hideAllContent() {
+            const contentSections = document.getElementsByClassName("content-section");
+            for (const section of contentSections) {
+                section.style.display = "none";
+            }
+        }
+
+        // Function to check if a profile picture is available
+        function hasProfilePicture() {
+            const imageElement = document.querySelector('#homeContent img');
+            return imageElement.src && !imageElement.src.endsWith('avatar.png');
+        }
+
+
+        // Function to show the profile image upload alert
+        function showProfileImageAlert() {
+            const profileImageAlert = document.getElementById('profileImageAlert');
+            profileImageAlert.style.display = 'block';
+
+        }
+
+        // Function to handle the "Upload Image" button click
+        function uploadProfileImage() {
+
+            const confirmChange = confirm("You cannot change your profile image once it's uploaded. Do you want to continue?");
+            if (!confirmChange) {
+                return; // User canceled the image upload
+            }
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*'; // Allow only image files
+
+            fileInput.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    const formData = new FormData();
+                    formData.append('image', file);
+
+                    fetch('/candidate/upload_profile_image', {
+                        method: 'POST',
+                        body: formData,
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Image uploaded successfully, you can update the displayed image
+                            const imageElement = document.querySelector('#homeContent img');
+                            imageElement.src = data.image_url;
+                            const profileImageAlert = document.getElementById('profileImageAlert');
+                            profileImageAlert.style.display = 'none';
+                        } else {
+                            alert('Image upload failed.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Image upload error:', error);
+                    });
+                }
+            });
+
+            fileInput.click();
+        }
+
+        window.addEventListener('load', function () {;
+            if (!hasProfilePicture()) {
+                showProfileImageAlert();
+            }
+            showHomeContent()
+        });
+
+
+    </script>
+</body>
+
+</html>
