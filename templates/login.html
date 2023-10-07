@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - HR-VATAR</title>
+    <!-- Add Materialize CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <style>
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #1976D2;
+            /* Darker blue color for the navigation bar */
+            color: #fff;
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            z-index: 1000;
+        }
+
+        .navbar-logo {
+            flex: 1;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+
+        .navbar-links {
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        .login-button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            background-color: #2196F3;
+            /* Blue color for the login button */
+            color: #fff;
+            /* White text color for the login button */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .login-button:hover {
+            background-color: #1976D2;
+            /* Slightly darker blue color on hover */
+        }
+
+        .selection-button {
+            margin-top: 80px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .selection-button button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            background-color: #fff;
+            color: #1976D2;
+            border: 2px solid #1976D2;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .selection-button button.active {
+            background-color: #1976D2;
+            color: #fff;
+        }
+
+        .login-form-container {
+            max-width: 600px;
+            margin: 100px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-field {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button[type="submit"] {
+            background-color: #1976D2;
+            /* Blue color for the submit button */
+            color: #fff;
+            /* White text color for the submit button */
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0D47A1;
+            /* Slightly darker blue color on hover */
+        }
+
+        .contact-section-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .contact-section {
+            max-width: 600px;
+            margin: 100px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .contact-section h2 {
+            margin-bottom: 20px;
+        }
+
+        .contact-section p {
+            margin-bottom: 20px;
+        }
+
+        .contact-section ul {
+            padding-left: 20px;
+            margin-bottom: 0;
+        }
+
+        .contact-section li {
+            list-style: disc;
+            margin-bottom: 10px;
+        }
+
+        .contact-section a {
+            color: #1976D2;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .contact-section a:hover {
+            color: #0D47A1;
+        }
+        
+    </style>
+</head>
+
+<body>
+    <div class="navbar">
+        <a href="/" class="navbar-logo">HR-VATAR</a>
+        <div class="navbar-links">
+            <a href="#contact-section">Contact Us</a>
+        </div>
+        <a href="/login" class="login-button">Login</a>
+    </div>
+
+    <div class="selection-button">
+        <button class="active" onclick="switchToCompanyLogin()">Company Login</button>
+        <button onclick="switchToCandidateLogin()">Candidate Login</button>
+    </div>
+
+    <div class="login-form-container" id="login-form">
+        <h2>Login</h2>
+        <!-- Update the form action to point to /process_login route -->
+        <form id="loginForm" action="/process_login">
+            <input type="hidden" name="login_type" id="loginType" value="company">
+    
+            <div class="input-field">
+                <label for="username">Username</label>
+                <input type="text" name="username" id="username" required>
+            </div>
+    
+            <div class="input-field">
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password" required>
+            </div>
+    
+            <button type="submit">Login</button>
+        </form>
+        <!-- Element to display error messages -->
+        <p id="error-message" class="error-message">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <ul class="flash-messages">
+                    <li style="color: red;">{{ messages[-1] }}</li>
+                    </ul>
+                {% endif %}
+            {% endwith %}
+        </p>
+    </div>
+
+    <div class="contact-section-container">
+        <div class="contact-section" id="contact-section">
+            <h2>Contact Us</h2>
+            <p>
+                For any inquiries or support, please feel free to reach out to us via the following email addresses:
+            </p>
+            <ul>
+                <li>Email: <a href="mailto:support@hrvatar.com">support@hrvatar.com</a></li>
+                <li>Email: <a href="mailto:info@hrvatar.com">info@hrvatar.com</a></li>
+                <!-- Add more email addresses as needed -->
+            </ul>
+        </div>
+    </div>
+
+    <!-- Add Materialize JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <script>
+        function switchToCompanyLogin() {
+            document.getElementById("loginType").value = "company";
+            document.querySelector(".selection-button button.active").classList.remove("active");
+            document.querySelector(".selection-button button:first-child").classList.add("active");
+        }
+
+        function switchToCandidateLogin() {
+            document.getElementById("loginType").value = "candidate";
+            document.querySelector(".selection-button button.active").classList.remove("active");
+            document.querySelector(".selection-button button:last-child").classList.add("active");
+        }
+
+    </script>
+</body>
+
+</html>

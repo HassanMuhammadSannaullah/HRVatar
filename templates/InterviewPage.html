@@ -1,0 +1,454 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <link rel="stylesheet" href="styles.css"> Link to your CSS file -->
+    <title>Your Page Title</title>
+
+    <style>
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #161414;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            z-index: 2;
+        }
+
+        .navbar-logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .navbar-logo:hover {
+            text-decoration: underline;
+        }
+
+        .navbar-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .center-section {
+            flex-grow: 1;
+            text-align: center;
+            margin: 0 20px;
+        }
+
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        .login-button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            background-color: #161414;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .login-button:hover {
+            background-color: #2196F3;
+        }
+
+        .centered {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+
+        }
+
+        .centered img {
+            height: 500px;
+            width: 500px;
+        }
+
+        .centered video {
+            height: 500px;
+            width: 1000px;
+
+        }
+
+
+        /* Additional CSS for centering */
+        .content {
+            text-align: center;
+        }
+
+
+        /* Hide the default video controls */
+        video::-webkit-media-controls {
+            display: none !important;
+        }
+
+        video::-webkit-media-controls-play-button {
+            display: none !important;
+        }
+
+        video::-webkit-media-controls-start-playback-button {
+            display: none !important;
+        }
+
+
+
+        /* Define CSS for the loading screen */
+        .loading-screen {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            /* Apply background blur */
+            flex-direction: column;
+            color: #0c0c0c;
+            font-size: 24px;
+        }
+
+        .loading-screen .rocket-icon {
+            font-size: 148px;
+            animation: rocket-animation 1s linear infinite
+        }
+
+        .loading-screen .loading-text {
+            display: flex;
+            margin-top: 20px;
+        }
+
+        @keyframes rocket-animation {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            25% {
+                transform: translate(0, 10px);
+            }
+
+            50% {
+                transform: translate(0, 0);
+            }
+
+            75% {
+                transform: translate(0, -10px);
+            }
+
+            100% {
+                transform: translate(0, 0);
+            }
+        }
+
+
+
+        .user-video-container {
+            position: absolute;
+            top: 120px;
+            /* Adjust the distance from the top navbar */
+            right: 10px;
+            width: 240px;
+            height: 160px;
+            border: 2px solid #3498db;
+            overflow: hidden;
+        }
+
+        .user-video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Additional styles for the countdown */
+        .countdown {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            color: #fff;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Include the navigation bar -->
+    <div class="navbar">
+        <div class="navbar-logo" onclick="location.href='/';">HR-VATAR</div>
+        <div class="center-section">
+            <div class="navbar-title">Candidate Interview</div>
+        </div>
+        <a href="/logout" class="login-button">LOG OUT</a>
+    </div>
+
+    <!-- Content for the center of the page -->
+    <div class="content">
+        <div class="centered">
+            <!-- Add a new loading screen container -->
+            <div class="loading-screen" id="loadingScreen">
+                <div class="rocket-icon">
+                    <p>🚁</p>
+                </div>
+                <p id="loading-text">Preparing your interview... This May Take upto 3 minutes</p>
+            </div>
+            <div id="Image_container" style="display: flex;">
+                <img id="media" src="{{ image_url }}" alt="Static Image">
+            </div>
+            <div id="Video_container" style="display: none;">
+                <video id="Interview_vid" controls></video>
+            </div>
+            <button id="startButton" class="login-button">Start Interview</button>
+            <div class="user-video-container" id="userVideoContainer">
+                <video id="userVideo" autoplay></video>
+            </div>
+            <div class="countdown" id="countdown">3</div>
+        </div>
+    </div>
+    <!-- JavaScript to handle button click and replace image with video -->
+    <script>
+        var image = document.getElementById('Image_container');
+        var Video_container = document.getElementById('Video_container');
+        var Video = document.getElementById('Interview_vid');
+        var startButton = document.getElementById('startButton');
+        var videoPaths = [];
+        var userVideo = document.getElementById('userVideo');
+        const loadingScreen = document.getElementById('loadingScreen');
+        const loading_text = document.getElementById('loading-text')
+        var mediaRecorders = [];
+        var videoBlobs = []
+        var audioBlobs = []
+        var videoChunks = [];
+        var audioChunks = [];
+
+        async function waitForPermissions() {
+            try {
+                const videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+
+                userVideo.srcObject = videoStream;
+
+                // Continue with the rest of your code after getting permissions
+                startButtonClickHandler(videoStream, audioStream);
+            } catch (error) {
+                console.error('Error accessing user camera and microphone:', error);
+            }
+        }
+
+        async function startCountdownAndRecord(videoStream, audioStream) {
+            const countdownElement = document.getElementById('countdown');
+            let countdown = 3; // Initial countdown value
+
+            // Display the countdown
+            countdownElement.style.display = 'block';
+
+            return new Promise((resolve) => {
+                // Start the countdown
+                const countdownInterval = setInterval(() => {
+                    countdownElement.textContent = countdown;
+                    countdown--;
+
+                    if (countdown < 0) {
+                        clearInterval(countdownInterval);
+                        countdownElement.style.display = 'none';
+
+                        // Create separate MediaRecorders for video and audio
+                        const videoMediaRecorder = new MediaRecorder(videoStream);
+                        const audioMediaRecorder = new MediaRecorder(audioStream);
+
+                        // Get audio track from the audioStream
+                        const audioTrack = audioStream.getAudioTracks()[0];
+
+                        // Get audio settings from the audio track
+                        const audioSettings = audioTrack.getSettings();
+
+                        console.log("Audio sample rate:", audioSettings.sampleRate);
+                        console.log("Audio sample width (bits):", audioSettings.sampleSize);
+
+                        const recordedVideoChunks = []; // For video recording
+                        const recordedAudioChunks = []; // For audio recording
+
+                        console.log("Audio MIME type:", audioMediaRecorder.mimeType);
+
+                        // Handle video data from the MediaRecorder
+                        videoMediaRecorder.ondataavailable = (event) => {
+                            if (event.data.size > 0) {
+                                recordedVideoChunks.push(event.data);
+                            }
+                        };
+
+                        // Handle audio data from the MediaRecorder
+                        audioMediaRecorder.ondataavailable = (event) => {
+                            if (event.data.size > 0) {
+                                recordedAudioChunks.push(event.data);
+                            }
+                        };
+
+                        // Handle the completion of video recording
+                        videoMediaRecorder.onstop = () => {
+                            const recordedVideoBlob = new Blob(recordedVideoChunks, { type: 'video/mp4;' });
+                            // You can save the recordedVideoBlob as needed (e.g., push it to an array)
+                            videoBlobs.push([recordedVideoBlob]);
+                        };
+
+                        // Handle the completion of audio recording
+                        audioMediaRecorder.onstop = () => {
+                            const recordedAudioBlob = new Blob(recordedAudioChunks, { type: 'audio/wav;' });
+                            // You can save the recordedAudioBlob as needed (e.g., push it to an array)
+                            audioBlobs.push([recordedAudioBlob]);
+                        };
+
+                        // Start video and audio recording
+                        videoMediaRecorder.start();
+                        audioMediaRecorder.start();
+
+                        // Record for 10 seconds (adjust the duration as needed)
+                        setTimeout(() => {
+                            videoMediaRecorder.stop();
+                            audioMediaRecorder.stop();
+                            resolve(); // Resolve the promise when recording is finished
+                        }, 10000);
+                    }
+                }, 1000);
+            });
+        }
+
+        async function playVideo(i) {
+            return new Promise((resolve) => {
+                Video.src = videoPaths[i];
+                Video.play();
+
+                Video.addEventListener('ended', () => {
+                    resolve();
+                });
+            });
+        }
+
+        async function fetchVideos() {
+            try {
+
+                loadingScreen.style.display = 'flex';
+                image.style.display = 'none';
+                startButton.style.display = 'none';
+
+                const urlParts = window.location.href.split('/')
+
+                const JobID = urlParts[urlParts.indexOf('candidate') + 1];
+
+                const response = await fetch('/candidate/GetInterviewVideos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 'JobID': JobID })
+                });
+
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    if (data && data["Database error"]) {
+                        alert(data["Database error"])
+
+                    }
+                    if (data && data["ProfileImage error"]) {
+                        alert(data["ProfileImage error"])
+                    }
+                    throw new Error(`Request failed with status: ${response.status}`);
+
+                }
+
+                const data = await response.json();
+                videoPaths = data.videoPaths;
+
+                loadingScreen.style.display = 'none';
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function startButtonClickHandler(videostream, audiostream) {
+            await fetchVideos();
+            Video_container.style.display = 'flex';
+
+            for (var i = 0; i < videoPaths.length; i++) {
+                await playVideo(i);
+                await startCountdownAndRecord(videostream, audiostream); // Wait for countdown before the next video
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+            }
+
+            await sendPairedBlobsToServer(videoBlobs, audioBlobs);
+            alert('done')
+            window.location.href = '/candidate/dashboard'
+
+
+        }
+
+
+        async function sendPairedBlobsToServer(videoBlobs, audioBlobs) {
+            try {
+                Video_container.style.display = 'none';
+                loading_text.textContent = 'Sending Your responses to the Servers........'
+                loadingScreen.style.display = 'flex';
+
+
+                const formData = new FormData();
+
+                for (let i = 0; i < audioBlobs.length; i++) {
+                    const videoBlob = videoBlobs[i][0];
+                    const audioBlob = audioBlobs[i];
+
+                    console.log("Audio Blob type:", audioBlob.type);
+
+                    formData.append(`video_${i + 1}`, videoBlob, `video_${i + 1}.mp4`);
+                    formData.append(`audio_${i + 1}`, new Blob(audioBlob), `audio_${i + 1}.wav`);
+
+                }
+
+                const response = await fetch('/candidate/recieve_response', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Request failed with status: ${response.status}`);
+                }
+
+                // Handle the server's response if needed
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+
+
+
+
+        document.getElementById('startButton').addEventListener('click', () => {
+            waitForPermissions();
+        });
+
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>File Upload</title>
+        <style>
+            .navbar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                background-color: #161414;
+                color: #fff;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 20px 20px;
+            }
+
+            .navbar a {
+                font-size: 1.5rem;
+                font-weight: bold;
+                color: #fff;
+                text-decoration: none;
+                margin: 0 10px;
+                align-items: center;
+            }
+
+            .navbar a:hover {
+                text-decoration: underline;
+            }
+
+            .button {
+                padding: 10px 20px;
+                font-size: 1rem;
+                background-color: #161414;
+                color: #fff;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+
+            body {
+                background-color: #ffffff;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                margin: 0;
+            }
+
+            .upload-box {
+                background-color: #fff;
+                border: 1px solid #ccc;
+                padding: 40px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+                text-align: center;
+            }
+
+            #drop-zone {
+                border: 2px dashed #ccc;
+                padding: 40px;
+                cursor: pointer;
+            }
+
+            #drop-zone.hover {
+                border: 2px dashed #007bff;
+                background-color: #f0f0f0;
+            }
+
+            .file-icon {
+                margin-top: 10px;
+                font-size: 48px;
+            }
+
+            #loading-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.6);
+                z-index: 1000;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            #loading-message {
+                background-color: #fff;
+                padding: 20px;
+                border-radius: 5px;
+                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            }
+
+            .modal {
+                display: none;
+                position: fixed;
+                z-index: 1;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                overflow: auto;
+                background-color: rgba(0, 0, 0, 0.7);
+            }
+
+            .modal-content {
+                background-color: #fefefe;
+                margin: auto;
+                padding: 20px;
+                border: 1px solid #888;
+                width: 50%;
+                /* Adjust the width as needed */
+                box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+                text-align: center;
+                position: relative;
+                top: 50%;
+                transform: translateY(-50%);
+                font-weight: bold;
+                font-size: 1rem;
+            }
+
+            .modal-button {
+                padding: 10px 20px;
+                font-size: 1rem;
+                margin: 10px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s ease, color 0.3s ease;
+                /* Add transition for color */
+                background-color: transparent;
+                /* Set an initial transparent background */
+                color: #161414;
+                /* Set the initial text color */
+                font-weight: bold;
+
+
+            }
+
+            .modal-button:hover {
+                background-color: #161414;
+                /* Change background color on hover */
+                color: #fff;
+                /* Change text color on hover */
+            }
+
+            .close-button {
+                font-size: 20px;
+                font-weight: bold;
+                text-align: left;
+                padding-left: 20px;
+            }
+
+            .close-button:hover {
+                cursor: pointer;
+                background-color: #161414;
+                color: #fff;
+
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="navbar">
+            <a href="/">HR-VATAR</a>
+        </div>
+
+        <div class="upload-box">
+            <h1>Upload Your Resume in a .docx or .pdf file</h1>
+            <form enctype="multipart/form-data" method="post" action="/candidate/process_resume" id="upload-form">
+                <div id="drop-zone">
+                    <p>Drag and drop files here or click to select files</p>
+                    <input type="file" name="file" id="file-input" accept=".docx,.pdf" style="display: none;" required>
+                </div>
+                <div id="file-info" style="display: none;">
+                    <i class="file-icon" id="file-icon"></i>
+                    <p id="file-name"></p>
+                </div>
+                <br>
+
+                <button type="submit" class="button">Upload</button>
+            </form>
+        </div>
+
+        <div style="display: none;" id="Jobid"> {{ JobID }} </div>
+
+        <!-- Modal -->
+        <div id="messageModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" id="closeModal">&times;</span>
+                <p id="modalMessage">Your resume passed our screening. You can give an AI-based interview.</p>
+                <div class="button-container">
+                    <button id="proceedButton" class="modal-button">Proceed</button>
+                    <button id="declineButton" class="modal-button">Decline</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            const uploadForm = document.getElementById('upload-form');
+            const dropZone = document.getElementById('drop-zone');
+            const fileInput = document.getElementById('file-input');
+            const fileInfo = document.getElementById('file-info');
+            const fileIcon = document.getElementById('file-icon');
+            const fileName = document.getElementById('file-name');
+
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('hover');
+            });
+
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('hover');
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('hover');
+
+                const files = e.dataTransfer.files;
+
+                if (files.length === 1) {
+                    const file = files[0];
+
+                    // Check if the file has a valid extension (PDF or DOCX)
+                    if (file.name.endsWith('.pdf') || file.name.endsWith('.docx')) {
+                        fileInput.files = file;
+                        displayFileInfo(file);
+                    } else {
+                        alert('Invalid file format. Please upload a PDF or DOCX file.');
+                    }
+                } else {
+                    alert('Please upload only one file.');
+                }
+            });
+
+            dropZone.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', () => {
+                displayFileInfo(fileInput.files[0]);
+            });
+
+            function displayFileInfo(file) {
+                if (file) {
+                    fileInfo.style.display = 'block';
+                    fileName.textContent = file.name;
+                    if (file.name.endsWith('.pdf')) {
+                        fileIcon.className = 'file-icon far fa-file-pdf';
+                    } else if (file.name.endsWith('.docx')) {
+                        fileIcon.className = 'file-icon fas fa-file-word';
+                    } else {
+                        fileIcon.className = 'file-icon far fa-file';
+                    }
+                } else {
+                    fileInfo.style.display = 'none';
+                }
+            }
+
+
+
+            const modal = document.getElementById('messageModal');
+            const modalMessage = document.getElementById('modalMessage');
+            const closeModal = document.getElementById('closeModal');
+            const proceedButton = document.getElementById('proceedButton');
+            const declineButton = document.getElementById('declineButton');
+            var jobID = null;
+
+            function showModal(message, isSuccess) {
+                modalMessage.textContent = message;
+
+
+                modal.style.display = 'block';
+            }
+
+            // Close the modal when the close button is clicked
+            closeModal.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+
+            // Close the modal if the user clicks outside of it
+            window.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+
+            // Show the modal when the form is submitted
+            uploadForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const loadingOverlay = document.createElement('div');
+                loadingOverlay.id = 'loading-overlay';
+                loadingOverlay.innerHTML = `
+        <div id="loading-message">
+            <i class="fas fa-spinner fa-spin"></i> Processing Your Resume
+        </div>
+    `;
+                document.body.appendChild(loadingOverlay);
+
+                const formData = new FormData(uploadForm);
+
+                // Retrieve the jobID value from the hidden input field
+                const jobIDElement = document.getElementById('Jobid');
+                jobID = jobIDElement.textContent;
+
+                formData.append('job_id', jobID);
+
+                try {
+                    const response = await fetch(uploadForm.action, {
+                        method: 'POST',
+                        body: formData,
+                    });
+
+                    document.body.removeChild(loadingOverlay);
+
+                    const responseData = await response.json();
+
+                    if (responseData.message === "File uploaded and processed successfully") {
+                        showModal('Your resume passed our screening. You can give an AI-based interview.', true);
+                    } else if (responseData.message === "Did Not meet requirements") {
+                        alert('Your resume did not meet the requirements for this job');
+                    } else if (responseData.message === "Failed to process the uploaded file") {
+                        alert('Could not read data from Resume', false);
+                    } else if (responseData.message === "Failed to upload") {
+                        alert('AN error in try catch', false);
+                    } else {
+                        alert('File did not reach server')
+                    }
+                } catch (error) {
+                    document.getElementById('loading-overlay').style.display = 'none';
+                    showModal('An error occurred', false);
+
+                    console.error(error);
+                }
+            });
+
+            // Handle button clicks
+            proceedButton.addEventListener('click', () => {
+                // Add your logic for proceeding here
+                // For example, you can redirect the user to the AI-based interview page
+                modal.style.display = 'none';
+
+                jobID = jobID.trim()
+                window.location.href = `/candidate/${jobID}/interview`;
+            });
+
+            declineButton.addEventListener('click', () => {
+                // Add your logic for declining here
+                // For example, you can log the decline and close the modal
+                modal.style.display = 'none';
+            });
+
+        </script>
+    </body>
+
+</html>

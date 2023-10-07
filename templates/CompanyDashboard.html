@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>HR-VATAR Dashboard</title>
+        <!-- Add Materialize CSS -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+        <style>
+            /* The top bar styling */
+            .navbar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                background-color: #161414;
+                color: #fff;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 10px 20px;
+                z-index: 2;
+            }
+
+            .navbar-logo {
+                font-size: 1.5rem;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+            .navbar-logo:hover {
+                text-decoration: underline;
+            }
+
+            .navbar-title {
+                font-size: 1.5rem;
+                font-weight: bold;
+            }
+
+            .center-section {
+                flex-grow: 1;
+                text-align: center;
+                margin: 0 20px;
+                /* Add margin to center section */
+            }
+
+            .navbar a {
+                color: #fff;
+                text-decoration: none;
+                margin: 0 10px;
+            }
+
+            .navbar a:hover {
+                text-decoration: underline;
+            }
+
+            .login-button {
+                padding: 10px 20px;
+                font-size: 1rem;
+                background-color: #161414;
+                color: #fff;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+
+            .login-button:hover {
+                background-color: #2196F3;
+            }
+
+            .sidebar-container {
+                margin-top: 160px;
+
+            }
+
+            /* The side menu styling */
+            .sidebar {
+                height: 100%;
+                width: 250px;
+                position: fixed;
+                top: 0;
+                left: 0;
+                background-color: #161414;
+                color: #fff;
+                padding-top: 100px;
+                /* Increased the top padding */
+                z-index: 1;
+                overflow-x: hidden;
+                transition: 0.3s;
+            }
+
+            .sidebar a {
+                margin-bottom: 40px;
+                padding-left: 16px;
+                text-decoration: none;
+                font-size: 1.5rem;
+                color: #fff;
+                display: block;
+                transition: 0.3s;
+            }
+
+
+            .sidebar-close {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                font-size: 2rem;
+                color: #fff;
+                cursor: pointer;
+            }
+
+            /* The content section styling */
+            .content-section {
+                margin-top: 35px;
+                padding: 20px;
+                font-size: 1.2rem;
+                color: #333;
+                margin-left: 250px;
+                transition: 0.3s;
+            }
+
+            .content-section.sidebar-closed {
+                margin-left: 0;
+            }
+
+            /* Cursor pointer for the hamburger icon */
+            .open-menu {
+                cursor: pointer;
+                font-size: 2rem;
+                margin-right: 10px;
+            }
+
+            /* Button styling for the sidebar */
+            .sidebar-buttons-container {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                padding-top: 20px;
+                height: calc(100% - 120px);
+                /* Set the height to fill the entire sidebar */
+            }
+
+            .sidebar a {
+                margin-bottom: 40px;
+                padding-left: 16px;
+                text-decoration: none;
+                font-size: 1.5rem;
+                color: #fff;
+                display: block;
+                transition: 0.3s;
+            }
+
+            .sidebar-button {
+                width: 150px;
+                margin: 5px;
+                background-color: #161414;
+                color: #fff;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+
+            /* Highlight the full container when hovering over the links */
+            .sidebar-button {
+                width: 150px;
+                padding: 10px;
+                /* Increase the padding to add space inside the button */
+                font-size: 1.3rem;
+                /* Increase the font size */
+                margin: 15px;
+                margin-bottom: 30px;
+                background-color: #161414;
+                color: #fff;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+
+            .sidebar a:hover {
+                background-color: #2196F3;
+                /* Change the background color on hover */
+                padding: 5px 16px;
+                border-radius: 5px;
+            }
+
+
+            .overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .loader {
+                border: 4px solid #f3f3f3;
+                border-top: 4px solid #3498db;
+                border-radius: 50%;
+                width: 50px;
+                height: 50px;
+                animation: spin 2s linear infinite;
+            }
+
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <!-- Side Menu -->
+        <div id="mySidebar" class="sidebar" style="width: 250px;">
+            <span class="sidebar-close" onclick="toggleSidebar()">&times;</span>
+            <div class="sidebar-container">
+                <a class="sidebar-link" href="#" onclick="showHomeContent()">Home</a>
+                <a class="sidebar-link" href="#" onclick="showPostJobContent()">Post a Job</a>
+                <a class="sidebar-link" href="#" onclick="showViewPostedJobsContent()">View Posted Jobs</a>
+            </div>
+        </div>
+
+        <!-- Top Bar -->
+        <div class="navbar">
+            <span class="open-menu" onclick="toggleSidebar()">&#9776;</span>
+            <div class="navbar-logo" onclick="location.href='/';">HR-VATAR</div>
+            <div class="center-section">
+                <div class="navbar-title">Company Dashboard</div>
+            </div>
+            <div class="right-section">
+                <a href="/logout" class="login-button">Logout</a>
+            </div>
+        </div>
+
+        <!-- Content Sections -->
+        <div class="content-section" id="homeContent">
+            <div style="display: flex; align-items: flex-end;">
+                <h2>Hello, {{ name }}</h2>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <img src="{{ image_url }}" alt="Avatar"
+                    style="width: 500px; height: 500px; object-fit: cover; border-radius: 0;">
+            </div>
+            <div id="profileImageAlert" style="display: block; text-align: center; margin-top: 10px;">
+                <p>Click Below to Upload/Update Avatar</p>
+                <button class="login-button" onclick="uploadProfileImage()">Upload Image</button>
+            </div>
+        </div>
+
+        <div class="content-section" id="postJobContent">
+            <div class="overlay" id="overlay">
+                <div class="loader"></div>
+            </div>
+            <h2>Post a Job</h2>
+            <form id="jobForm" onsubmit="submitJob(event)">
+
+                <label for="jobName" style="font-size: 1.2rem; color: #555;">Job/Position Name:</label>
+                <input type="text" id="jobName" name="job_Name" required>
+
+                <label for="jobDescription" style="font-size: 1.2rem; color: #555;">Description:</label>
+                <textarea id="jobDescription" name="job_Description" rows="6" style="resize: vertical;"
+                    required></textarea>
+
+                <label for="candidateInfo" style="font-size: 1.2rem; color: #555;">Candidate (Must Have):</label>
+                <input type="text" id="candidateInfo" name="candidateInfo" required>
+
+                <button class="login-button" type="submit">Post Job</button>
+            </form>
+            <div id="postMessage"></div>
+            <div id="job_posted_link" style="display: none;"><a id="job_link" href="">View Posted Job</a></div>
+        </div>
+
+        <div class="content-section" id="viewPostedJobsContent" style="display:none;">
+            <!-- Content for "View Posted Jobs" section goes here -->
+            <table style="width: 100%; table-layout: fixed;">
+                <tr>
+                    <td style="text-align: right;">
+                        <button class="login-button" onclick="updatePostedJobs()">Update</button>
+                    </td>
+                </tr>
+            </table>
+            <h2>Posted Jobs</h2>
+            <table class="jobs-table" id="jobsTable">
+                <!-- Table headers, remain static -->
+                <tr>
+                    <th>Job/Position</th>
+                    <th>Description</th>
+                    <th>Candidate (Must Have)</th>
+                    <!-- Additional columns -->
+                    <th>Posted On LinkedIn</th>
+                    <th>Still Hiring</th>
+                </tr>
+                <!-- Table body, will be updated dynamically using JavaScript -->
+                <tbody id="jobsTableBody">
+                </tbody>
+            </table>
+        </div>
+
+
+        <!-- Add Materialize JavaScript -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+        <script>
+            /* JavaScript functions to handle the side menu and content display */
+            function toggleSidebar() {
+                const sidebar = document.getElementById("mySidebar");
+                const contentSections = document.getElementsByClassName("content-section");
+                if (sidebar.style.width === "250px") {
+                    sidebar.style.width = "0";
+                    for (const section of contentSections) {
+                        section.classList.add("sidebar-closed");
+                    }
+                } else {
+                    sidebar.style.width = "250px";
+                    for (const section of contentSections) {
+                        section.classList.remove("sidebar-closed");
+                    }
+                }
+            }
+
+            function showHomeContent() {
+                hideAllContent();
+                document.getElementById("homeContent").style.display = "block";
+            }
+
+            function showPostJobContent() {
+                hideAllContent();
+                document.getElementById("postJobContent").style.display = "block";
+                document.getElementById('overlay').style.display = 'none';
+                document.getElementById("job_posted_link").style.display = 'none';
+            }
+
+            function showViewPostedJobsContent() {
+                hideAllContent();
+                document.getElementById("viewPostedJobsContent").style.display = "block";
+
+            }
+
+            function hideAllContent() {
+                const contentSections = document.getElementsByClassName("content-section");
+                for (const section of contentSections) {
+                    section.style.display = "none";
+                }
+            }
+
+            function submitJob(event) {
+                event.preventDefault();
+
+                document.getElementById("job_posted_link").style.display = 'none';
+
+                const jobName = document.getElementById('jobName').value;
+                const jobDescription = document.getElementById('jobDescription').value;
+                const candidateInfo = document.getElementById('candidateInfo').value;
+
+                if (!jobName || !jobDescription || !candidateInfo) {
+                    document.getElementById('postMessage').textContent = 'Please fill out the complete form';
+                    return; // Stop further processing
+                }
+
+                document.getElementById('overlay').style.display = 'flex';
+
+                const formData = {
+                    jobName: jobName,
+                    jobDescription: jobDescription,
+                    candidateInfo: candidateInfo
+                };
+
+                fetch('/company/dashboard/add_job', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('postMessage').textContent = data.message; // Display success message
+
+                        document.getElementById("job_posted_link").style.display = 'flex';
+                        job_link = document.getElementById("job_link");
+                        job_link.href = data.job_link;
+
+                        document.getElementById('overlay').style.display = 'none';
+
+                        // Clear the form fields
+                        document.getElementById('jobName').value = '';
+                        document.getElementById('jobDescription').value = '';
+                        document.getElementById('candidateInfo').value = '';
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        document.getElementById('postMessage').textContent = 'Could Not Post Job';
+                        document.getElementById('overlay').style.display = 'none';
+
+                    });
+            }
+
+            function fetchAndShowPostedJobs() {
+                fetch("/company/dashboard/get_jobs_data", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({}),
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        updateTable(data.jobs);
+                    })
+                    .catch((error) => {
+                        console.error("Error:", error);
+                    });
+            }
+
+            function updateTable(jobs) {
+                var tableBody = document.createElement("tbody");
+
+                jobs.forEach(function (job) {
+                    var row = document.createElement("tr");
+
+                    // // Create table cells for each job data
+                    // var companyCell = document.createElement("td");
+                    // companyCell.textContent = job.Company;
+                    // row.appendChild(companyCell);
+
+                    var jobPositionCell = document.createElement("td");
+                    jobPositionCell.textContent = job.JobPosition;
+                    row.appendChild(jobPositionCell);
+
+                    var descriptionCell = document.createElement("td");
+                    descriptionCell.textContent = job.Description;
+                    row.appendChild(descriptionCell);
+
+                    var candidateCell = document.createElement("td");
+                    candidateCell.textContent = job.CandidateMustHave;
+                    row.appendChild(candidateCell);
+
+                    // Additional columns
+                    var postedOnLinkedInCell = document.createElement("td");
+                    postedOnLinkedInCell.textContent = job.PostedOnLinkedIn ? "Yes" : "No";
+                    row.appendChild(postedOnLinkedInCell);
+
+                    var stillHiringCell = document.createElement("td");
+                    stillHiringCell.textContent = job.StillHiring ? "Yes" : "No";
+                    row.appendChild(stillHiringCell);
+
+                    tableBody.appendChild(row);
+                });
+
+
+                // Get the existing table and replace its body with the updated one
+                var table = document.getElementById("jobsTable");
+                var existingTableBody = document.getElementById("jobsTableBody");
+                if (existingTableBody) {
+                    table.removeChild(existingTableBody);
+                }
+
+                table.appendChild(tableBody);
+                tableBody.id = "jobsTableBody"; // Assign the same ID to the new tbody for future updates
+            }
+
+            function updatePostedJobs() {
+                fetchAndShowPostedJobs()
+            }
+
+            // // Function to check if a profile picture is available
+            // function hasProfilePicture() {
+            //     const imageElement = document.querySelector('#homeContent img');
+            //     return imageElement.src && !imageElement.src.endsWith('avatar.png');
+            // }
+
+
+            // // Function to show the profile image upload alert
+            // function showProfileImageAlert() {
+            //     const profileImageAlert = document.getElementById('profileImageAlert');
+            //     profileImageAlert.style.display = 'block';
+
+            // }
+
+            // Function to handle the "Upload Image" button click
+            function uploadProfileImage() {
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.accept = 'image/*'; // Allow only image files
+
+                fileInput.addEventListener('change', (event) => {
+                    const file = event.target.files[0];
+                    if (file) {
+                        const formData = new FormData();
+                        formData.append('image', file);
+
+                        fetch('/company/upload_profile_image', {
+                            method: 'POST',
+                            body: formData,
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    // Image uploaded successfully, you can update the displayed image
+                                    const imageElement = document.querySelector('#homeContent img');
+                                    imageElement.src = data.image_url;
+                                } else {
+                                    alert('Image upload failed.');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Image upload error:', error);
+                            });
+                    }
+                });
+
+                fileInput.click();
+            }
+
+            window.addEventListener('load', function () {
+                ;
+                showHomeContent()
+                updatePostedJobs()
+            });
+        </script>
+    </body>
+
+</html>
