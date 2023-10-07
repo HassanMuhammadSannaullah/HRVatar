@@ -1,0 +1,6 @@
+*.pyc
+__pycache__/
+temp/**
+HRVatar_env/**
+resources/models/**
+GPTResParser/wav2lip/checkpoints/**
