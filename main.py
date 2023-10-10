@@ -17,10 +17,10 @@ from utils import (
 )
 import base64
 import os
-from GPTResParser.InterviewGenerator import generateInterview
-from GPTResParser.InterviewProcessor import EvaluateAudio
-from GPTResParser.ResumeParser import Parse
-from GPTResParser.JobPoster import PostJob
+from hrvatar.InterviewGenerator import generateInterview
+from hrvatar.InterviewProcessor import EvaluateAudio
+from hrvatar.ResumeParser import Parse
+from hrvatar.JobPoster import PostJob
 import threading
 from werkzeug.utils import secure_filename
 import pydub
@@ -589,7 +589,8 @@ def recieveResponses():
     print("called api")
     try:
         for path in session["interview_videos"]:
-            os.remove(os.path.normpath(path))
+            path = os.path.normpath(path)
+            os.remove(path[1:])
 
         video_files = {}
         audio_files = {}
@@ -618,6 +619,8 @@ def recieveResponses():
             audio_path = os.path.join(temp_dir, file.filename)
             file.save(audio_path)
             audio_paths.append(audio_path)
+
+        print("Response files saved")
 
         evaluate_thread = threading.Thread(
             target=Evaluate,

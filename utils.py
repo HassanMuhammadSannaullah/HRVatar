@@ -1,5 +1,5 @@
 import mysql.connector
-from GPTResParser.InterviewProcessor import EvaluateAudio
+from hrvatar.InterviewProcessor import EvaluateAudio
 
 
 def get_db_connection():
