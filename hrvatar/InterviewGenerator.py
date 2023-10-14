@@ -1,6 +1,6 @@
-from GPTResParser.SpeechProcessor.TTS import text_to_speech
-from GPTResParser.wav2lip.Wav2Lip import Processor
-from GPTResParser.AI.queryAI import askGPT3
+from hrvatar.SpeechProcessor.TTS import text_to_speech
+from hrvatar.wav2lip.Wav2Lip import Processor
+from hrvatar.AI.queryAI import askGPT3
 import re
 import time
 import os

@@ -104,3 +104,7 @@ def PostJob(title, skills, Description, Country, State=None):
     driver.close()
     driver.quit()
     return joblink
+
+
+if __name__ == "__main__":
+    PostJob("test", "test", "test", "test", "test")

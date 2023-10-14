@@ -1,5 +1,5 @@
-from GPTResParser.AI.queryAI import askGPT3
-from GPTResParser.SpeechProcessor.STT import speech_to_text
+from hrvatar.AI.queryAI import askGPT3
+from hrvatar.SpeechProcessor.STT import speech_to_text
 import re
 
 

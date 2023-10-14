@@ -34,7 +34,9 @@ from gradio_client import Client
 
 
 def askGPT3(query):
-    client = Client("https://openskyml-opensky-llm-chatgpt-ui.hf.space/")
+    client = Client(
+        "https://openskyml-pigeon-chat.hf.space/"
+    )  # https://openskyml-opensky-llm-chatgpt-ui.hf.space/
     result = client.predict(
         query, api_name="/chat"  # str in 'Message' Textbox component
     )

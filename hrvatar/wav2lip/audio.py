@@ -5,7 +5,7 @@ import numpy as np
 # import tensorflow as tf
 from scipy import signal
 from scipy.io import wavfile
-from GPTResParser.wav2lip.hparams import hparams as hp
+from hrvatar.wav2lip.hparams import hparams as hp
 
 
 def load_wav(path, sr):

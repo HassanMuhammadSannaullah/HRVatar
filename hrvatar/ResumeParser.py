@@ -2,7 +2,7 @@ from pdfminer.high_level import extract_text as extract_text_from_pdf
 import docx2txt
 import re
 import time
-from GPTResParser.AI.queryAI import askGPT3
+from hrvatar.AI.queryAI import askGPT3
 
 
 class Parse:

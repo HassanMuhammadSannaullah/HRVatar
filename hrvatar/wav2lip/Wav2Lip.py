@@ -16,7 +16,7 @@ class Processor:
     def __init__(
         self,
         checkpoint_path=os.path.join(
-            "GPTResParser", "wav2lip", "checkpoints", "wav2lip_gan.pth"
+            "hrvatar", "wav2lip", "checkpoints", "wav2lip_gan.pth"
         ),
         nosmooth=False,
         static=False,
@@ -40,7 +40,7 @@ class Processor:
         # Load the pre-trained Haar Cascade Classifier for face detection
         face_cascade = cv2.CascadeClassifier(
             os.path.join(
-                "GPTResParser",
+                "hrvatar",
                 "wav2lip",
                 "checkpoints",
                 "haarcascade_frontalface_default.xml",
@@ -265,7 +265,7 @@ class Processor:
         ):
             if i == 0:
                 model = self.load_model(self.checkpoint_path)
-                temp_folder = os.path.join("GPTResParser", "wav2lip", "temp")
+                temp_folder = os.path.join("hrvatar", "wav2lip", "temp")
                 if not os.path.exists(temp_folder):
                     os.makedirs(temp_folder)
                 print("Model loaded")
