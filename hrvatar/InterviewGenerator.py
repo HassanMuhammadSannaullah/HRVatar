@@ -11,7 +11,7 @@ def _generateQuestions(description, QuestionCount):
     query = f"""Generate {QuestionCount} interview questions to ask a candidate for the following job:
         {description}
 
-        Write each question in <question></question> tags
+        Write each question in <question></question> tags. Keep the questions of medium length
         """
     text = askGPT3(query)
     questions = re.findall(r"<question>(.*?)</question>", text)

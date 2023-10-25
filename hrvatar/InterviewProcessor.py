@@ -17,7 +17,7 @@ def GPTRateAnswers(questions, answers):
                 0 is worst and 10 is best"""
         result = askGPT3(query)
         score = re.findall(r"<score>(.*?)</score>", result)
-        output.append(score[0])
+        output.append(score[0] if score[0] else 0)
     return output
 
 
@@ -29,5 +29,5 @@ def EvaluateAudio(questions, answer_audio_paths):
         answers_text.append(speech_to_text(audio))
     print(answers_text)
     GPT_Scores = GPTRateAnswers(questions, answers_text)
-    scores = GPT_Scores
+    scores = GPT_Scores  # implement video and audio modekls to get confidence score and then return the total sum
     return scores

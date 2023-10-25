@@ -9,6 +9,7 @@ from hrvatar.wav2lip.models import Wav2Lip
 from hrvatar.wav2lip import audio
 from datetime import datetime
 import shutil
+import ffmpeg
 from . import wav_2_lip_checkpoint
 
 
@@ -305,15 +306,28 @@ class Processor:
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         output_path = os.path.join("static", "InterviewVideos", f"{timestamp}.mp4")
 
-        # Load the video and audio clips
-        video_clip = VideoFileClip(generated_video_path)
-        audio_clip = AudioFileClip(audio_file)
+        # # Load the video and audio clips
+        # video_clip = VideoFileClip(generated_video_path)
+        # audio_clip = AudioFileClip(audio_file)
 
-        # Set the audio of the video clip to the loaded audio clip
-        video_clip = video_clip.set_audio(audio_clip)
+        # # Set the audio of the video clip to the loaded audio clip
+        # video_clip = video_clip.set_audio(audio_clip)
 
-        # Write the combined video to a new file
-        video_clip.write_videofile(output_path, codec="libx264", audio_codec="aac")
+        # # Write the combined video to a new file
+        # video_clip.write_videofile(output_path, codec="libx264")
+
+        # Run FFmpeg to add audio to the video
+        # Input video and audio file paths
+        input_video = ffmpeg.input(generated_video_path)
+        input_audio = ffmpeg.input(audio_file)
+
+        output_stream = ffmpeg.output(input_video, input_audio, output_path)
+
+        output_stream.output_format = "mp4"
+        output_stream.video_codec = "libx264"
+        output_stream.audio_codec = "libmp3lame"
+        # output_stream.output_file = output_path
+        output_stream.run()
 
         return output_path
 
