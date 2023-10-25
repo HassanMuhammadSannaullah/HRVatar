@@ -162,7 +162,6 @@ class Parse:
         # See if the user passes all types of minimum requirements only. say yes or no in <response></response> tags
         # and reason in <reason></reason> tag.:
         # """
-        time.sleep(2)
         text = askGPT3(query=query)
         response_match = re.search(r"<response>(.*?)</response>", text)
         reason_match = re.search(r"<reason>(.*?)</reason>", text)

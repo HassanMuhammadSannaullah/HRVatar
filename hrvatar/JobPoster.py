@@ -6,6 +6,10 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+import email  # Import email module for email parsing
+from html import unescape
 
 
 def PostJob(title, skills, Description, Country, State=None):
@@ -14,97 +18,150 @@ def PostJob(title, skills, Description, Country, State=None):
         service=Service(executable_path=ChromeDriverManager().install())
     )
 
-    email = "hrvatar@outlook.com"
+    username = "hrvatar@outlook.com"
     password = "@hassansana1"
     joblink = ""
+    wait = WebDriverWait(driver, 10)
 
     driver.get("https://www.jobisite.com/postFreeJob.htm")
-    # title
-    driver.find_element(By.XPATH, '//*[@id="title"]').send_keys(title)
 
-    # skills
-    driver.find_element(
-        By.XPATH, '//*[@id="content"]/div/div[2]/form/div/div[3]/div/div[2]/input'
-    ).send_keys(skills)
+    # Title
+    title_element = wait.until(
+        EC.presence_of_element_located((By.XPATH, '//*[@id="title"]'))
+    )
+    title_element.send_keys(title)
 
-    # description
-    driver.find_element(By.XPATH, '//*[@id="discription"]').send_keys(Description)
+    # Skills
+    skills_element = wait.until(
+        EC.presence_of_element_located(
+            (By.XPATH, '//*[@id="content"]/div/div[2]/form/div/div[3]/div/div[2]/input')
+        )
+    )
+    skills_element.send_keys(skills)
+
+    # Description
+    description_element = wait.until(
+        EC.presence_of_element_located((By.XPATH, '//*[@id="discription"]'))
+    )
+    description_element.send_keys(Description)
+
+    viewport_height = driver.execute_script("return window.innerHeight")
+
+    # Scroll down by half the viewport height
+    driver.execute_script(f"window.scrollBy(0, {viewport_height / 2});")
 
     # Country
-    driver.find_element(By.XPATH, f'//option[@value="{Country}"]').click()
+    country_element = wait.until(
+        EC.presence_of_element_located((By.XPATH, f'//option[@value="{Country}"]'))
+    )
+    country_element.click()
 
     # State
     if State:
-        driver.find_element(
-            By.XPATH, f'//*[@id="state"]/option[@value="{State}"]'
-        ).click()
+        state_element = wait.until(
+            EC.presence_of_element_located(
+                (By.XPATH, f'//*[@id="state"]/option[@value="{State}"]')
+            )
+        )
+        state_element.click()
 
     # Email
-    driver.find_element(By.XPATH, '//*[@id="email1"]').send_keys(email)
+    email_element = wait.until(
+        EC.presence_of_element_located((By.XPATH, '//*[@id="email1"]'))
+    )
+    email_element.send_keys(username)
 
-    # Post on Other Boards option
-    driver.find_element(
-        By.XPATH, '//*[@id="content"]/div/div[2]/form/div/div[8]/div/div[2]/input'
-    ).click()
+    # Calculate the halfway point of the page's vertical scroll height
+    scroll_height = driver.execute_script(
+        "return Math.max( document.body.scrollHeight, document.body.offsetHeight, document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight );"
+    )
+    halfway = scroll_height / 2
+
+    # Scroll to the halfway point
+    driver.execute_script(f"window.scrollTo(0, {halfway});")
+
+    # # Post on Other Boards option
+    # post_on_other_boards_element = wait.until(
+    #     EC.presence_of_element_located(
+    #         (By.XPATH, '//*[@id="content"]/div/div[2]/form/div/div[8]/div/div[2]/input')
+    #     )
+    # )
+    # post_on_other_boards_element.click()
 
     # Captcha
     captcha = driver.find_element(By.XPATH, '//*[@id="txtCaptchaDiv"]').text
     driver.find_element(By.XPATH, '//*[@id="txtInput"]').send_keys(captcha)
 
-    time.sleep(2)
+    time.sleep(5)
     # Submit Button
     driver.find_element(
         By.XPATH, '//*[@id="content"]/div/div[2]/form/div/div[11]/div/div[2]/a'
     ).click()
 
     time.sleep(10)
+    # Email server configuration
+    server_name = "outlook.office365.com"
+    port = 993  # Port for TLS (IMAPS)
 
-    mail = imaplib.IMAP4_SSL("outlook.office365.com")
-    mail.login(email, password)
-    mail.select("INBOX")
+    # Connect to the server
+    mail = imaplib.IMAP4_SSL(server_name, port)  # Use IMAP4_SSL for TLS encryption
 
-    # Search for the latest unread email
-    typ, msg_ids = mail.search(None, "UNSEEN")
-    msg_ids = msg_ids[0].decode().split()
+    # Log in to your email account
 
-    if msg_ids:
-        # Mark the previous unread emails as seen
-        for msg_id in msg_ids[:-1]:
-            mail.store(msg_id, "+FLAGS", "\\Seen")
+    mail.login(username, password)
 
-        msg_id = msg_ids[-1]  # Assuming the last email is the verification email
+    # Select the mailbox you want to search
+    mailbox_name = "INBOX"
+    mail.select(mailbox_name)
 
-        # Fetch the email data
-        typ, message_data = mail.fetch(msg_id, "(RFC822)")
-        message_body = message_data[0][1]
+    # Search for all email IDs in the mailbox
+    status, email_ids = mail.search(None, "ALL")
 
-        # Close the server connection
-        mail.close()
-        mail.logout()
+    # Get the latest email ID
+    latest_email_id = email_ids[0].split()[-1]
 
-        # Extract the verification code from the email body
-        html_content = message_body.decode("utf-8")
-        soup = BeautifulSoup(html_content, "html.parser")
+    # Fetch the latest email by ID
+    status, email_data = mail.fetch(latest_email_id, "(RFC822)")
 
-        # Define a regular expression pattern to find URLs
-        url_pattern = re.compile(r"https?://[^\s]+")
+    # Parse the email content
+    raw_email = email_data[0][1]
+    email_message = email.message_from_bytes(raw_email)
 
-        # Find all URLs in the email body
-        urls = url_pattern.findall(soup.get_text())
+    # # Function to recursively find verification link in email content
+    # def find_verification_link(message):
+    #     for part in message.walk():
+    #         if part.get_content_type() == "text/html":
+    #             body = part.get_payload(decode=True).decode()
+    #             links = re.findall(r'href=["\'](https?://[^"\']+)["\']', body)
+    #             for link in links:
+    #                 if "verification" in link:
+    #                     return link
+    #     return None
 
-        # Filter the URLs to find the one that matches your expected format
-        expected_url_pattern = re.compile(r"https://www\.jobisite\.com/sj/id/\d+-\w+")
-        for url in urls:
-            print(url)
-            if expected_url_pattern.match(url):
-                # This is the link you are looking for
-                joblink = url
-                break
+    # verification_link = find_verification_link(email_message)
+
+    # if verification_link:
+    #     print("Verification Link found:", verification_link)
+    # else:
+    #     print("No verification link found in the latest email.")
+
+    # Print the email subject and body
+    email_subject = email_message.get("Subject")
+    email_body = email_message.get_payload(decode=True).decode()
+
+    # Define a regular expression pattern to match URLs containing "serviceFreeJobActivate"
+    url_pattern = r'https?://[^\s<>"]*serviceFreeJobActivate[^\s<>"]*'
+
+    # Use re.findall to extract all matching URLs from the email body
+    verification_links = re.findall(url_pattern, unescape(email_body))
+
+    mail.logout()
 
     driver.close()
     driver.quit()
-    return joblink
+
+    return verification_links[-1]
 
 
 if __name__ == "__main__":
-    PostJob("test", "test", "test", "test", "test")
+    print(PostJob("test", "test", "test", "Oman"))
