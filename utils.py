@@ -1,5 +1,7 @@
 import mysql.connector
-from hrvatar.InterviewProcessor import EvaluateAudio
+from hrvatar.InterviewProcessor import EvaluateAudio, EvaluateVideo
+from gradio_client import Client
+from PIL import Image
 
 
 def get_db_connection():
@@ -65,14 +67,34 @@ def get_candidateRequirements(job_id):
 # Perform evaludation a seprate thread
 def Evaluate(questions, answer_audio_paths, answer_video_paths):
     print("in evaludation functions")
-    scores = EvaluateAudio(questions, answer_audio_paths)
-    print(scores)
+    audio_scores = EvaluateAudio(questions, answer_audio_paths)
+    video_scores = EvaluateVideo(answer_video_paths)
+    print(video_scores)
     # After processing, you can delete the temporary directory and its contents
     # to clean up the files.
     # for video_path in video_paths:
     #     os.remove(video_path)
     # for audio_path in audio_paths:
     #     os.remove(audio_path)
+
+
+def process_profile_image(image_path):
+    client = Client("https://alfasign-remove-background-on-image.hf.space/")
+    result = client.predict(
+        image_path,  # str (filepath or URL to image)in 'image' Image component
+        api_name="/predict",
+    )
+    print(result)
+    img = Image.open(result)
+
+    new_image = Image.new("RGB", img.size, "white")
+
+    # Paste the original image onto the new image, using the alpha channel (if present)
+    new_image.paste(img, (0, 0), img)
+
+    # Save the result
+    new_image.save(result)
+    return result
 
 
 account_exist_html = """<html>

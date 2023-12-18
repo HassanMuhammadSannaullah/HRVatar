@@ -1,26 +1,25 @@
+from exchangelib import Credentials, DELEGATE, Account
+import re
+from html import unescape
+
+
 import time
-import imaplib
 import re
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
-from bs4 import BeautifulSoup
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-import email  # Import email module for email parsing
-from html import unescape
 
 
 def PostJob(title, skills, Description, Country, State=None):
+    username = "hrvatar@outlook.com"
     # Initialize the WebDriver with WebDriverManager
     driver = webdriver.Chrome(
         service=Service(executable_path=ChromeDriverManager().install())
     )
 
-    username = "hrvatar@outlook.com"
-    password = "@hassansana1"
-    joblink = ""
     wait = WebDriverWait(driver, 10)
 
     driver.get("https://www.jobisite.com/postFreeJob.htm")
@@ -98,70 +97,40 @@ def PostJob(title, skills, Description, Country, State=None):
         By.XPATH, '//*[@id="content"]/div/div[2]/form/div/div[11]/div/div[2]/a'
     ).click()
 
-    time.sleep(10)
-    # Email server configuration
-    server_name = "outlook.office365.com"
-    port = 993  # Port for TLS (IMAPS)
+    # time.sleep(10)
+    # # Outlook credentials
+    # outlook_email = "hrvatar@outlook.com"
+    # outlook_password = "@hassansana1"
 
-    # Connect to the server
-    mail = imaplib.IMAP4_SSL(server_name, port)  # Use IMAP4_SSL for TLS encryption
+    # # Set up Exchange credentials
+    # credentials = Credentials(username=outlook_email, password=outlook_password)
 
-    # Log in to your email account
+    # # Connect to the Outlook account
+    # account = Account(
+    #     primary_smtp_address=outlook_email,
+    #     credentials=credentials,
+    #     autodiscover=True,
+    #     access_type=DELEGATE,
+    # )
 
-    mail.login(username, password)
+    # # Access the inbox
+    # inbox = account.inbox
 
-    # Select the mailbox you want to search
-    mailbox_name = "INBOX"
-    mail.select(mailbox_name)
+    # # Get the latest email
+    # latest_email = inbox.filter().order_by("-datetime_received")[0]
 
-    # Search for all email IDs in the mailbox
-    status, email_ids = mail.search(None, "ALL")
+    # # Print the email subject and body
+    # email_subject = latest_email.subject
+    # email_body = latest_email.text_body
 
-    # Get the latest email ID
-    latest_email_id = email_ids[0].split()[-1]
+    # # Define a regular expression pattern to match URLs containing "serviceFreeJobActivate"
+    # url_pattern = r'https?://[^\s<>"]*serviceFreeJobActivate[^\s<>"]*'
 
-    # Fetch the latest email by ID
-    status, email_data = mail.fetch(latest_email_id, "(RFC822)")
+    # # Use re.findall to extract all matching URLs from the email body
+    # verification_links = re.findall(url_pattern, unescape(email_body))
 
-    # Parse the email content
-    raw_email = email_data[0][1]
-    email_message = email.message_from_bytes(raw_email)
+    # # Print the verification links
+    # for link in verification_links:
+    #     print(link)
 
-    # # Function to recursively find verification link in email content
-    # def find_verification_link(message):
-    #     for part in message.walk():
-    #         if part.get_content_type() == "text/html":
-    #             body = part.get_payload(decode=True).decode()
-    #             links = re.findall(r'href=["\'](https?://[^"\']+)["\']', body)
-    #             for link in links:
-    #                 if "verification" in link:
-    #                     return link
-    #     return None
-
-    # verification_link = find_verification_link(email_message)
-
-    # if verification_link:
-    #     print("Verification Link found:", verification_link)
-    # else:
-    #     print("No verification link found in the latest email.")
-
-    # Print the email subject and body
-    email_subject = email_message.get("Subject")
-    email_body = email_message.get_payload(decode=True).decode()
-
-    # Define a regular expression pattern to match URLs containing "serviceFreeJobActivate"
-    url_pattern = r'https?://[^\s<>"]*serviceFreeJobActivate[^\s<>"]*'
-
-    # Use re.findall to extract all matching URLs from the email body
-    verification_links = re.findall(url_pattern, unescape(email_body))
-
-    mail.logout()
-
-    driver.close()
-    driver.quit()
-
-    return verification_links[-1]
-
-
-if __name__ == "__main__":
-    print(PostJob("test", "test", "test", "Oman"))
+    return "done"

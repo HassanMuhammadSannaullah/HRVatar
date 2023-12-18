@@ -14,6 +14,7 @@ from utils import (
     get_candidateRequirements,
     job_id_exists,
     Evaluate,
+    process_profile_image,
 )
 import base64
 import os
@@ -258,7 +259,7 @@ def add_job():
             job_apply_link = ""
             if result:
                 job_id = result[0]
-                job_apply_link = f"127.0.0.1:5000/candidate/{job_id}/upload_resume"
+                job_apply_link = f"/candidate/{job_id}/upload_resume"
                 print(job_apply_link)
 
             # Post Job on Job Board
@@ -267,7 +268,7 @@ def add_job():
 
             response_data = {
                 "message": "Job posted successfully!",
-                "job_link": job_link,
+                "job_link": job_apply_link,
             }
 
             return (
@@ -333,21 +334,29 @@ def upload_profile_image_company():
         file = request.files["image"]
         if file:
             # Process and save the image to the database
-            connection = get_db_connection()
-            cursor = connection.cursor()
+            temp_path = os.path.join("temp", "temp_profile_images", str(file.filename))
+            file.save(temp_path)
 
-            candidate_id = 1  # Change this to the candidate's actual ID
-            image_data = file.read()  # Read the image binary data
+            processed_image = process_profile_image(temp_path)
 
-            # Insert or update the image in the database
-            cursor.execute(
-                "UPDATE companyaccounts SET profileimage = %s WHERE companyid = %s",
-                (image_data, session["CompanyID"]),
-            )
-            connection.commit()
-            connection.close()
-            cursor.close()
+            if processed_image:
+                connection = get_db_connection()
+                cursor = connection.cursor()
 
+                # candidate_id = 1  # Change this to the candidate's actual ID
+                with open(processed_image, "rb") as temp_file:
+                    image_data = temp_file.read()  # Read the image binary data
+
+                # Insert or update the image in the database
+                cursor.execute(
+                    "UPDATE companyaccounts SET profileimage = %s WHERE companyid = %s",
+                    (image_data, session["CompanyID"]),
+                )
+                connection.commit()
+                connection.close()
+                cursor.close()
+            else:
+                return jsonify({"success": False, "error": "Image upload failed."})
             image_url = (
                 f"data:image/jpeg;base64,{base64.b64encode(image_data).decode('utf-8')}"
             )
@@ -472,12 +481,12 @@ def ProcessResume():
 
         # Instantiate the Parse class with the temporary file path
         parser = Parse(temp_file_path)
-
+        print("parsing completed")
         if parser.resume_txt:
             job_requirements = get_candidateRequirements(job_id)
 
-            applicable, reason = parser.check_applicable_for_job(job_requirements)
-            print(applicable, reason)
+            applicable = parser.check_applicable_for_job(job_requirements)
+            print(applicable)
             if applicable.strip().lower() == "yes":
                 print(f"Job Id {job_id}")
                 # Delete the temporary file after processing
@@ -646,4 +655,4 @@ def logout():
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=False)
