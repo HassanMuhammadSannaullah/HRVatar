@@ -79,23 +79,25 @@ def Evaluate(questions, answer_audio_paths, answer_video_paths):
 
 
 def process_profile_image(image_path):
-    client = Client("https://alfasign-remove-background-on-image.hf.space/")
-    result = client.predict(
-        image_path,  # str (filepath or URL to image)in 'image' Image component
-        api_name="/predict",
-    )
-    print(result)
-    img = Image.open(result)
+    try:
+        client = Client("https://alfasign-remove-background-on-image.hf.space/")
+        result = client.predict(
+            image_path,  # str (filepath or URL to image)in 'image' Image component
+            api_name="/predict",
+        )
+        print(result)
+        img = Image.open(result)
 
-    new_image = Image.new("RGB", img.size, "white")
+        new_image = Image.new("RGB", img.size, "white")
 
-    # Paste the original image onto the new image, using the alpha channel (if present)
-    new_image.paste(img, (0, 0), img)
+        # Paste the original image onto the new image, using the alpha channel (if present)
+        new_image.paste(img, (0, 0), img)
 
-    # Save the result
-    new_image.save(result)
-    return result
-
+        # Save the result
+        new_image.save(result)
+        return result
+    except:
+        return "Error"
 
 account_exist_html = """<html>
                             <head>

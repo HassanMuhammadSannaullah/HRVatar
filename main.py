@@ -339,6 +339,9 @@ def upload_profile_image_company():
 
             processed_image = process_profile_image(temp_path)
 
+            if processed_image=="Error":
+                processed_image=temp_path
+
             if processed_image:
                 connection = get_db_connection()
                 cursor = connection.cursor()
@@ -655,4 +658,4 @@ def logout():
 
 
 if __name__ == "__main__":
-    app.run(debug=False)
+    app.run(debug=True)
