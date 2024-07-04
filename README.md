@@ -1,2 +1,2 @@
 # HRVatar
-AI based Avatar Interviewer and Candidate Selectort
+AI based Avatar Interviewer and Candidate Selector
